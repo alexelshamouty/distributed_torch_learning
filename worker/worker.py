@@ -14,7 +14,7 @@ compute_opts = [
 ]
 CONF.register_opts(compute_opts, group='worker')
 
-CONF(default_config_files=['../ikaros.conf'])
+CONF(default_config_files=['/app/ikaros.conf'])
 
 WORKER_TOPIC_PREFIX = "worker-"
 # Initialize Oslo Messaging transport

@@ -12,7 +12,7 @@ scheduler_opts = [
 ]
 CONF.register_opts(scheduler_opts, group='scheduler')
 
-CONF(default_config_files=['../ikaros.conf'])
+CONF(default_config_files=['/app/ikaros.conf'])
 WORKER_TOPIC_PREFIX = "worker-"
 
 transport = oslo_messaging.get_rpc_transport(CONF, url=CONF.scheduler.transport_url)

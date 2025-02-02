@@ -39,7 +39,7 @@ compute_opts = [
 CONF.register_opts(compute_opts, group='curator')
 
 # Load the configuration file
-CONF(default_config_files=['../ikaros.conf'])
+CONF(default_config_files=['/app/ikaros.conf'])
 
 
 @admin_app.before_request

@@ -16,7 +16,7 @@ curator_opts = [
 ]
 CONF.register_opts(curator_opts, group='curator')
 
-CONF(default_config_files=['../ikaros.conf'])
+CONF(default_config_files=['/app/ikaros.conf'])
 
 transport = oslo_messaging.get_rpc_transport(CONF, url=CONF.curator.transport_url)
 target = oslo_messaging.Target(topic=CONF.curator.topic, server='curator-service')
