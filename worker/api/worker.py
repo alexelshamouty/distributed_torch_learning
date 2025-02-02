@@ -1,9 +1,9 @@
 from oslo_versionedobjects import base
 from oslo_versionedobjects import fields
-from database import get_session
+from database.database import get_session
 from database.models import Worker as DBWorker
 
-class Worker(base.VersionedObjectDictCompat, base.PersistentObject, base.VersionedObject):
+class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
     """Represents a worker (compute node) that can be managed remotely via RPC."""
 
     VERSION = '1.0'  # Object version for backward compatibility

@@ -3,12 +3,17 @@ from oslo_db.sqlalchemy import session as db_session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database.models import Base
+import os 
 
 CONF = cfg.CONF
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define the relative database path
+DB_PATH = os.path.join(BASE_DIR, "oslo_db.sqlite")
 
 # Define database configuration
 db_opts = [
-    cfg.StrOpt('connection', default='sqlite:///oslo_db.sqlite', help='Database connection string')
+    cfg.StrOpt('connection', default="sqlite:///"+DB_PATH, help='Database connection string')
 ]
 CONF.register_opts(db_opts, group='database')
 

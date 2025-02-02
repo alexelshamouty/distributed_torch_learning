@@ -4,6 +4,8 @@ import json
 import time
 
 from worker.api.worker import Worker
+from database.database import get_session
+
 # Define configuration options
 CONF = cfg.CONF
 
@@ -27,6 +29,7 @@ class ConductorService:
     target = oslo_messaging.Target(namespace='curator', version='2.0')
 
     def get_node_by_hostname(self, context, worker_hostname):
+        print(f"Finding worker {worker_hostname}")
         return Worker.get_by_hostname(context, worker_hostname)
     
     def update_host_status(self, context, worker_node):
