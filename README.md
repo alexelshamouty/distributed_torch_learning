@@ -1,6 +1,6 @@
-#Distributed Learning Task Orchestrator
+# Distributed Learning Task Orchestrator
 
-##Overview
+## Overview
 
 This project provides a distributed task orchestration system for submitting and managing PyTorch training jobs using OpenStack-style architecture with Oslo Messaging and SQLAlchemy.
 
