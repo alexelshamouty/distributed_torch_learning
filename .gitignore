@@ -16,4 +16,4 @@ debug/
 pytest_cache/
 *.swp
 *.swo
-database/oslo_db.sqlite
+./database/oslo_db.sqlite
