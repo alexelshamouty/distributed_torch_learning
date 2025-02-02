@@ -3,6 +3,7 @@ import oslo_messaging
 import json
 import time
 
+from worker.api.worker import Worker
 # Define configuration options
 CONF = cfg.CONF
 
@@ -25,34 +26,66 @@ class ConductorService:
     """Nova Conductor Service for managing compute node registration."""
     target = oslo_messaging.Target(namespace='curator', version='2.0')
 
+    def get_node_by_hostname(self, context, worker_hostname):
+        return Worker.get_by_hostname(context, worker_hostname)
+    
+    def update_host_status(self, context, worker_node):
+        if worker_node:
+            worker_node.last_seen = time.time()
+            worker_node.state = "up"
+            worker_node.save()
+            return {"status":"updated","node":worker_node.hostname}
+        
     def register_compute_node(self, context, node_data):
         """Registers a new compute node."""
-        node_id = node_data.get("host", "unknown")
-        compute_nodes[node_id] = {
-            "vcpus": node_data.get("vcpus", 0),
-            "memory_mb": node_data.get("memory_mb", 0),
-            "disk_gb": node_data.get("disk_gb", 0),
-            "state": "up",
-            "last_seen": time.time()
-        }
-        print(f"Registered compute node: {node_id}")
-        return {"status": "registered", "node": node_id}
+        worker_hostname = node_data.get("host", "unknown")
+        if not (worker_hostname):
+            return {"status": "error", "message":"Missing host id"}
+        
+        worker_node = self.get_node_by_hostname(context, worker_hostname)
+        if worker_node:
+            return self.update_host_status(context,worker_node)
+        
+        worker_node = Worker(
+            hostname = worker_hostname,
+            vcpus = node_data.get("vcpus", 0),
+            memory_mb = node_data.get("memory_mb", 0),
+            disk_gb = node_data.get("disk_gb", 0),
+            state = "up",
+            last_seen = time.time()
+        )
+        
+        worker_node.create()
+
+        print(f"Registered compute node: {worker_hostname}")
+        return {"status": "registered", "node": worker_hostname}
     
     def list_nodes(self, context):
         if context['is_admin']:
-            return {"nodes": compute_nodes}
+            workers = Worker.list_all(context)
+            workers = [{
+                "hostname": worker.hostname,
+                "vcpus": worker.vcpus,
+                "gpus": worker.gpus,
+                "memory_mb": worker.memory_mb,
+                "disk_gb": worker.disk_gb,
+                "state": worker.state,
+                "last_seen": worker.last_seen
+            } for worker in workers]
+            return workers
         else:
             return {"nodes":""}
         
     def heartbeat(self, context, node_data):
         """Receives heartbeats from compute nodes."""
-        node_id = node_data.get("host")
-        if node_id in compute_nodes:
-            compute_nodes[node_id]["last_seen"] = time.time()
-            compute_nodes[node_id]["state"] = "up"
-            print(f"Heartbeat received from {node_id}")
+        worker_hostname = node_data.get("host", "unknown")
+        if not worker_hostname:
+            return {"status": "error", "message":"Missing host id"}
+        worker_node = self.get_node_by_hostname(context, worker_hostname)
+        if worker_node:
+            return self.update_host_status(context,worker_node)
         else:
-            print(f"Unknown node {node_id} sending heartbeat!")
+            print(f"Unknown node {worker_hostname} sending heartbeat!")
         return {"status": "heartbeat received"}
 
 def start_conductor():
