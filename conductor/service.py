@@ -37,7 +37,13 @@ class ConductorService:
         }
         print(f"Registered compute node: {node_id}")
         return {"status": "registered", "node": node_id}
-
+    
+    def list_nodes(self, context):
+        if context['is_admin']:
+            return {"nodes": compute_nodes}
+        else:
+            return {"nodes":""}
+        
     def heartbeat(self, context, node_data):
         """Receives heartbeats from compute nodes."""
         node_id = node_data.get("host")

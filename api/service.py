@@ -1,6 +1,9 @@
-from flask import Flask
+from flask import Flask, g
 from flask_restx import Api, Resource
 import threading
+from oslo_config import cfg
+import oslo_messaging
+from authenticate import authenticate_request
 
 # Initialize Flask applications
 public_app = Flask(__name__)
@@ -22,27 +25,52 @@ work = {
 
 # Public API Namespace
 public_ns = public_api.namespace('public', description='Public API operations')
+# Admin API Namespace
+admin_ns = admin_api.namespace('admin', description='Admin API operations')
 
+CONF = cfg.CONF
+
+compute_opts = [
+    cfg.StrOpt('rabbitmq_host', required=True, help='RabbitMQ server hostname for curator'),
+    cfg.StrOpt('transport_url', required=True, help='RabbitMQ transport URL for curator'),
+    cfg.StrOpt('topic', required=True, help='RPC topic for curator')
+]
+
+CONF.register_opts(compute_opts, group='curator')
+
+# Load the configuration file
+CONF(default_config_files=['../ikaros.conf'])
+
+
+@admin_app.before_request
+@public_app.before_request
+def before_request():
+    authenticate_request()
+    
 @public_ns.route('/nodes')
 class NodeList(Resource):
     def get(self):
+        context = g.context
+        if not context or not context.is_admin:
+            return {"message": "Unauthorized"}, 401
         """List all nodes"""
-        return list(nodes.values())
+        transport = oslo_messaging.get_rpc_transport(CONF, url=CONF.curator.transport_url)
+        target = oslo_messaging.Target(topic=CONF.curator.topic, namespace='curator',  version='2.0')
+        client = oslo_messaging.get_rpc_client(transport, target, version_cap='2.0')
+        nodes = client.call(context, 'list_nodes')
+        return nodes
 
-@public_ns.route('/nodes/<int:node_id>')
+@admin_ns.route('/nodes/<int:node_id>')
 class NodeDetail(Resource):
     def get(self, node_id):
         """Show details of a node"""
         return nodes.get(node_id, {'message': 'Node not found'})
 
-@public_ns.route('/nodes/<int:node_id>/work')
+@admin_ns.route('/nodes/<int:node_id>/work')
 class NodeWork(Resource):
     def get(self, node_id):
         """List work on a node"""
         return work.get(node_id, {'message': 'No work found'})
-
-# Admin API Namespace
-admin_ns = admin_api.namespace('admin', description='Admin API operations')
 
 @admin_ns.route('/nodes/<int:node_id>')
 class NodeManagement(Resource):
