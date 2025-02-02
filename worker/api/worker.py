@@ -8,6 +8,10 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
 
     VERSION = '1.0'  # Object version for backward compatibility
 
+    def __init__(self, context=None, **kwargs):
+        super().__init__(**kwargs)
+        self._context = context  # ✅ Ensure context is set
+
     fields = {
         "id": fields.IntegerField(),
         "hostname": fields.StringField(),

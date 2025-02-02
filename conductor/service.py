@@ -1,7 +1,7 @@
 from oslo_config import cfg
 import oslo_messaging
 import json
-import time
+from datetime import datetime
 
 from worker.api.worker import Worker
 from database.database import get_session
@@ -34,7 +34,7 @@ class ConductorService:
     
     def update_host_status(self, context, worker_node):
         if worker_node:
-            worker_node.last_seen = time.time()
+            worker_node.last_seen = datetime.utcnow()
             worker_node.state = "up"
             worker_node.save()
             return {"status":"updated","node":worker_node.hostname}
@@ -50,12 +50,14 @@ class ConductorService:
             return self.update_host_status(context,worker_node)
         
         worker_node = Worker(
+            {},
             hostname = worker_hostname,
             vcpus = node_data.get("vcpus", 0),
             memory_mb = node_data.get("memory_mb", 0),
             disk_gb = node_data.get("disk_gb", 0),
+            gpus = "0",
             state = "up",
-            last_seen = time.time()
+            last_seen = datetime.utcnow()
         )
         
         worker_node.create()
