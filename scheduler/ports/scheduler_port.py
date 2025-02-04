@@ -4,17 +4,16 @@ class SchedulerPort(ABC):
     """ Defining the Scheduler contracts """
 
     @abstractmethod
-    def schedule(self):
+    def schedule(self, context, job_data):
         """ Schedule a job """
         pass
+    
     @abstractmethod
-
-    @abstractmethod
-    def publish_task_scheduled(self, job, node):
+    def publish_task_scheduled(self, context, job, node):
         """ Publish a task scheduled event """
         pass
 
     @abstractmethod
-    def rollback_job(self, job, node):
+    def rollback_job(self,context, job, node):
         """ Rollback a job in case of faliure"""
         pass

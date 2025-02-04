@@ -1,6 +1,5 @@
 from oslo_versionedobjects import base, fields
 
-from database.database import get_session
 from database.models import Worker as DBWorker
 
 
@@ -9,10 +8,10 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
 
     VERSION = "1.0"  # Object version for backward compatibility
 
-    def __init__(self, context=None, **kwargs):
+    def __init__(self, session=None, context=None, **kwargs):
         super().__init__(**kwargs)
         self._context = context
-
+        self.session = session
     fields = {
         "id": fields.IntegerField(),
         "hostname": fields.StringField(),
@@ -35,7 +34,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
     @base.remotable
     def create(self):
         """Creates a new worker in the database."""
-        session = get_session()
+        session = self.session
         with session.begin():
             db_worker = DBWorker(
                 hostname=self.hostname,
@@ -52,7 +51,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
     @base.remotable
     def save(self):
         """Updates an existing worker in the database."""
-        session = get_session()
+        session = self.session
         with session.begin():
             db_worker = session.query(DBWorker).filter_by(id=self.id).first()
             if not db_worker:
@@ -67,7 +66,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
     @base.remotable_classmethod
     def get_by_id(cls, context, worker_id):
         """Retrieve a worker by its ID."""
-        session = get_session()
+        session = self.session
         db_worker = session.query(DBWorker).filter_by(id=worker_id).first()
         if not db_worker:
             return None
@@ -76,7 +75,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
     @base.remotable_classmethod
     def get_by_hostname(cls, context, worker_hostname):
         """Retrieve a worker by its ID."""
-        session = get_session()
+        session = self.session
         db_worker = session.query(DBWorker).filter_by(hostname=worker_hostname).first()
         if not db_worker:
             return None
@@ -85,7 +84,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
     @base.remotable_classmethod
     def list_all(cls, context):
         """Retrieve all workers."""
-        session = get_session()
+        session = self.session
         db_workers = session.query(DBWorker).all()
         return [
             cls._from_db_object(context, cls(), db_worker) for db_worker in db_workers
@@ -94,7 +93,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
     @base.remotable
     def delete(self):
         """Deletes a worker from the database."""
-        session = get_session()
+        session = self.session
         with session.begin():
             db_worker = session.query(DBWorker).filter_by(id=self.id).first()
             if db_worker:

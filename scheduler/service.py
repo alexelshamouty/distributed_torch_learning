@@ -3,6 +3,9 @@ import random
 
 import oslo_messaging
 from oslo_config import cfg
+from scheduler.adapters.federated_learning import FederatedScheduler
+from common.adapters.messaging_adapter import OsloMessaging
+from database.adapters.sqlite import SqlLiteDatabase
 
 CONF = cfg.CONF
 
@@ -21,29 +24,20 @@ CONF(default_config_files=["/app/ikaros.conf"])
 WORKER_TOPIC_PREFIX = "worker-"
 
 transport = oslo_messaging.get_rpc_transport(CONF, url=CONF.scheduler.transport_url)
-target = oslo_messaging.Target(topic=CONF.scheduler.topic, server="scheduler-service")
+target = oslo_messaging.Target(namespace="scheduler", version="1.0", topic=CONF.scheduler.topic, server="scheduler-service")
 
 
 class SchedulerService:
     """Scheduler service listening for job requests and dispatching to workers."""
-
-    target = oslo_messaging.Target(namespace="scheduler", version="1.0")
+    def __init__(self):
+        self.messaging = OsloMessaging(transport)
+        self.database = SqlLiteDatabase()
+        self.scheduler = FederatedScheduler(self.database, self.messaging)
 
     def schedule_job(self, context, job_data):
-        """Selects a node and forwards the job to the corresponding worker queue."""
-        available_nodes = ["node-1", "node-2", "node-3"]
-        selected_node = random.choice(available_nodes)
-        job_data["assigned_node"] = selected_node
-
-        print(f"Scheduled job {job_data['job_id']} to {selected_node}")
-
-        # Send the job to the selected worker topic
-        worker_target = oslo_messaging.Target(
-            topic=f"{WORKER_TOPIC_PREFIX}{selected_node}"
-        )
-        worker_client = oslo_messaging.RPCClient(transport, worker_target)
-        worker_client.cast(context, "execute_job", job_data=job_data)
-        return {"status": "scheduled", "node": selected_node}
+        task_spec = self.scheduler.schedule(context, job_data)
+        self.scheduler.publish_task_scheduled(context, job_data, "node-1")
+        return {"status": "scheduled", "node": "selected_node"}
 
 
 def start_scheduler():
