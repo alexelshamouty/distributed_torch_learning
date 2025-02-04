@@ -10,7 +10,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
 
     def __init__(self, context=None, **kwargs):
         super().__init__(**kwargs)
-        self._context = context  # ✅ Ensure context is set
+        self._context = context
 
     fields = {
         "id": fields.IntegerField(),

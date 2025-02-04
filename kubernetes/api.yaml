@@ -17,7 +17,7 @@ spec:
       containers:
         - name: api
           image: api:latest
-          command: ["python", "api/service.py"]
+          command: ["python", "-m", "api.service"]
           ports:
             - containerPort: 5001
             - containerPort: 5002

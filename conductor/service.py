@@ -3,7 +3,7 @@ import oslo_messaging
 import json
 from datetime import datetime
 
-from worker.api.worker import Worker
+from database.controllers.worker import Worker
 from database.database import get_session
 
 # Define configuration options
@@ -64,22 +64,6 @@ class ConductorService:
 
         print(f"Registered compute node: {worker_hostname}")
         return {"status": "registered", "node": worker_hostname}
-    
-    def list_nodes(self, context):
-        if context['is_admin']:
-            workers = Worker.list_all(context)
-            workers = [{
-                "hostname": worker.hostname,
-                "vcpus": worker.vcpus,
-                "gpus": worker.gpus,
-                "memory_mb": worker.memory_mb,
-                "disk_gb": worker.disk_gb,
-                "state": worker.state,
-                "last_seen": worker.last_seen
-            } for worker in workers]
-            return workers
-        else:
-            return {"nodes":""}
         
     def heartbeat(self, context, node_data):
         """Receives heartbeats from compute nodes."""
