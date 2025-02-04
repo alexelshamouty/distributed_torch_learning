@@ -25,4 +25,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire application code
 COPY . .
 
+EXPOSE 5001
+EXPOSE 5002
 
