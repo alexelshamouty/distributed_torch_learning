@@ -1,8 +1,9 @@
-from oslo_db.sqlalchemy import models
-import sqlalchemy as sa
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+
+import sqlalchemy as sa
+from oslo_db.sqlalchemy import models
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 

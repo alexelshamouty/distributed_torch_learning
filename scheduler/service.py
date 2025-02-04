@@ -1,7 +1,8 @@
-from oslo_config import cfg
-import oslo_messaging
 import json
 import random
+
+import oslo_messaging
+from oslo_config import cfg
 
 CONF = cfg.CONF
 

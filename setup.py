@@ -1,5 +1,6 @@
 import os
 import subprocess
+
 from database.database import init_db
 
 ALEMBIC_DIR = "migrations"

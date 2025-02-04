@@ -1,8 +1,10 @@
+import threading
+
+import oslo_messaging
 from flask import Flask, g
 from flask_restx import Api, Resource
-import threading
 from oslo_config import cfg
-import oslo_messaging
+
 from api.authenticate import authenticate_request
 from api.models.api import job_api as job_api
 from api.models.api import nodes_api as nodes_api

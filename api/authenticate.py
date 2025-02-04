@@ -1,4 +1,4 @@
-from flask import Flask, request, g
+from flask import Flask, g, request
 from oslo_context import context
 
 

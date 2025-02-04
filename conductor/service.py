@@ -1,7 +1,8 @@
-from oslo_config import cfg
-import oslo_messaging
 import json
 from datetime import datetime
+
+import oslo_messaging
+from oslo_config import cfg
 
 from database.controllers.worker import Worker
 from database.database import get_session

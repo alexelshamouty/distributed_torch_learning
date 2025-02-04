@@ -1,9 +1,9 @@
+import oslo_messaging
 from flask import g
 from flask_restx import Namespace, Resource, fields
-import oslo_messaging
 from oslo_config import cfg
-from database.controllers.worker import Worker
 
+from database.controllers.worker import Worker
 
 #######
 # Configuration

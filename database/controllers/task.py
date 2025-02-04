@@ -1,5 +1,5 @@
-from oslo_versionedobjects import base
-from oslo_versionedobjects import fields
+from oslo_versionedobjects import base, fields
+
 from database import get_session
 from database.models import Job as DBJob
 

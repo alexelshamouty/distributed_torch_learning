@@ -1,9 +1,11 @@
+import os
+
 from oslo_config import cfg
 from oslo_db.sqlalchemy import session as db_session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from database.models import Base
-import os
 
 CONF = cfg.CONF
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -1,7 +1,8 @@
-from oslo_config import cfg
-import oslo_messaging
-import time
 import socket
+import time
+
+import oslo_messaging
+from oslo_config import cfg
 
 # Define configuration options
 CONF = cfg.CONF
