@@ -33,6 +33,9 @@ client = oslo_messaging.get_rpc_client(transport, target, version_cap="2.0")
 host = WORKER_TOPIC_PREFIX + CONF.worker.worker_host
 
 
+def provision_task(context, task):
+    """ Here we need to logic that would start a task"""
+    pass
 def register_compute():
     """Registers the compute node with the curator."""
     node_data = {
