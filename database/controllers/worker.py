@@ -3,10 +3,11 @@ from oslo_versionedobjects import fields
 from database.database import get_session
 from database.models import Worker as DBWorker
 
+
 class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
     """Represents a worker (compute node) that can be managed remotely via RPC."""
 
-    VERSION = '1.0'  # Object version for backward compatibility
+    VERSION = "1.0"  # Object version for backward compatibility
 
     def __init__(self, context=None, **kwargs):
         super().__init__(**kwargs)
@@ -42,7 +43,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
                 gpus=self.gpus,
                 memory_mb=self.memory_mb,
                 disk_gb=self.disk_gb,
-                state=self.state
+                state=self.state,
             )
             session.add(db_worker)
             session.flush()  # Ensures `id` is generated
@@ -56,11 +57,11 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
             db_worker = session.query(DBWorker).filter_by(id=self.id).first()
             if not db_worker:
                 raise Exception(f"Worker {self.id} not found")
-            
+
             for field in self.fields:
                 if field in db_worker.__dict__ and getattr(self, field) is not None:
                     setattr(db_worker, field, getattr(self, field))
-            
+
             session.flush()
 
     @base.remotable_classmethod
@@ -71,7 +72,7 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
         if not db_worker:
             return None
         return cls._from_db_object(context, cls(), db_worker)
-    
+
     @base.remotable_classmethod
     def get_by_hostname(cls, context, worker_hostname):
         """Retrieve a worker by its ID."""
@@ -80,13 +81,15 @@ class Worker(base.VersionedObjectDictCompat, base.VersionedObject):
         if not db_worker:
             return None
         return cls._from_db_object(context, cls(), db_worker)
-    
+
     @base.remotable_classmethod
     def list_all(cls, context):
         """Retrieve all workers."""
         session = get_session()
         db_workers = session.query(DBWorker).all()
-        return [cls._from_db_object(context, cls(), db_worker) for db_worker in db_workers]
+        return [
+            cls._from_db_object(context, cls(), db_worker) for db_worker in db_workers
+        ]
 
     @base.remotable
     def delete(self):

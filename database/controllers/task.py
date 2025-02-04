@@ -3,10 +3,11 @@ from oslo_versionedobjects import fields
 from database import get_session
 from database.models import Job as DBJob
 
+
 class Task(base.VersionedObjectDictCompat, base.PersistentObject, base.VersionedObject):
     """Represents a task (job) object for database interactions."""
-    
-    VERSION = '1.0'  # Versioning for backward compatibility
+
+    VERSION = "1.0"  # Versioning for backward compatibility
 
     fields = {
         "id": fields.IntegerField(),
@@ -37,7 +38,7 @@ class Task(base.VersionedObjectDictCompat, base.PersistentObject, base.Versioned
                 github_url=self.github_url,
                 worker_name=self.worker_name,
                 worker_id=self.worker_id,
-                status=self.status
+                status=self.status,
             )
             session.add(db_task)
             session.flush()  # Ensures `id` is generated
@@ -51,11 +52,11 @@ class Task(base.VersionedObjectDictCompat, base.PersistentObject, base.Versioned
             db_task = session.query(DBJob).filter_by(id=self.id).first()
             if not db_task:
                 raise Exception(f"Job {self.id} not found")
-            
+
             for field in self.fields:
                 if field in db_task.__dict__ and getattr(self, field) is not None:
                     setattr(db_task, field, getattr(self, field))
-            
+
             session.flush()
 
     @base.remotable_classmethod
@@ -66,7 +67,7 @@ class Task(base.VersionedObjectDictCompat, base.PersistentObject, base.Versioned
         if not db_task:
             return None
         return cls._from_db_object(context, cls(), db_task)
-    
+
     @base.remotable_classmethod
     def list_all(cls, context):
         """Retrieve all jobs."""
