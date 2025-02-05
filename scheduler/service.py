@@ -5,7 +5,6 @@ import oslo_messaging
 from oslo_config import cfg
 from scheduler.adapters.federated_learning import FederatedScheduler
 from common.adapters.messaging_adapter import OsloMessaging
-from database.adapters.sqlite import SqlLiteDatabase
 
 CONF = cfg.CONF
 
@@ -24,15 +23,17 @@ CONF(default_config_files=["/app/ikaros.conf"])
 WORKER_TOPIC_PREFIX = "worker-"
 
 transport = oslo_messaging.get_rpc_transport(CONF, url=CONF.scheduler.transport_url)
-target = oslo_messaging.Target(namespace="scheduler", version="1.0", topic=CONF.scheduler.topic, server="scheduler-service")
+target = oslo_messaging.Target(topic=CONF.scheduler.topic, server="scheduler-service")
 
 
 class SchedulerService:
+
+    target = oslo_messaging.Target(namespace="scheduler", version="1.0")
+
     """Scheduler service listening for job requests and dispatching to workers."""
     def __init__(self):
         self.messaging = OsloMessaging(transport)
-        self.database = SqlLiteDatabase()
-        self.scheduler = FederatedScheduler(self.database, self.messaging)
+        self.scheduler = FederatedScheduler(self.messaging)
 
     def schedule_job(self, context, job_data):
         task_spec = self.scheduler.schedule(context, job_data)

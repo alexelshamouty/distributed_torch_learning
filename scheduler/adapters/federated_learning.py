@@ -6,15 +6,13 @@ import oslo_messaging
 
 import random 
 class FederatedScheduler(SchedulerPort):
-    def __init__(self, db_adapter: DatabasePort, messaging_adapter: MessagingPort):
-        self.db_adapter = db_adapter
+    def __init__(self, messaging_adapter: MessagingPort):
         self.messaging_adapter = messaging_adapter
 
     def schedule(self, context, job_data):
         """Selects a node and forwards the job to the corresponding worker queue."""
-        nodes = Worker(self.db_adapter.get_session(), context)
-        available_nodes = nodes.list_all(context)
-        available_nodes_hostnames = [hostname for hostname in available_nodes['hostname']]
+        available_nodes = Worker.list_all(context)
+        available_nodes_hostnames = [node['hostname'] for node in available_nodes]
         selected_node = random.choice(available_nodes_hostnames)
         """ Now that we have the right node we need a client for that node """
         client = self.messaging_adapter.get_client(selected_node)

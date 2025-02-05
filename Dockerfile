@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     ssh\
     wget\
     curl\
+    vim\
     && rm -rf /var/lib/apt/lists/*
 
 
